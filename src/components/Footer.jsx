@@ -95,8 +95,7 @@ const Footer = () => {
             transition={{ duration: 0.6 }}
             className="caption text-white/60 tracking-wide"
           >
-            © {new Date().getFullYear()} The Internet Eagle — All Rights
-            Reserved.
+            © {new Date().getFullYear()} WALSA ONE— All Rights Reserved.
           </motion.p>
 
           {/* Social Icons */}
