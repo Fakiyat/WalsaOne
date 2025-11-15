@@ -291,7 +291,7 @@ const FeatureOrbs = ({ mounted, parallaxRef }) => {
 };
 
 /* ----------------------------------
-   🌌 PREMIUM MVP CREATION BACKGROUND
+ Background
 ---------------------------------- */
 export const BackgroundCircles = ({ parallaxRef }) => {
   const [mounted, setMounted] = useState(false);
