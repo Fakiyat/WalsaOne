@@ -1,23 +1,33 @@
-import { useLocation } from "react-router-dom";
 import { disablePageScroll, enablePageScroll } from "scroll-lock";
-import WaslaOne from "../assets/WaslaLogo2.png";
+import WaslaOne from "../assets/WaslaLogo2.webp";
 import { navigation } from "../constants";
 import Button from "./Button";
 import MenuSvg from "../assets/svg/MenuSvg";
 import { HamburgerMenu } from "./design/Header";
 import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import OptimizedImage from "./OptimizedImage";
 
 const Header = () => {
-  const pathname = useLocation();
   const [openNavigation, setOpenNavigation] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [activeHash, setActiveHash] = useState("");
   const overlayRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 18);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const updateHash = () => setActiveHash(window.location.hash || "");
+    updateHash();
+
+    window.addEventListener("hashchange", updateHash);
+    return () => window.removeEventListener("hashchange", updateHash);
   }, []);
 
   const toggleNavigation = () => {
@@ -66,12 +76,13 @@ const Header = () => {
         <div className="max-w-7xl mx-auto flex items-center px-4 lg:px-6 h-[4rem] lg:h-[6rem]">
           {/* Logo */}
           <a className="block w-[15rem] xl:mr-8" href="#hero" aria-label="Home">
-            <img
+            <OptimizedImage
               src={WaslaOne}
               width={100}
               height={70}
               alt="Wasla One"
               className="h-30 w-auto object-contain drop-shadow-[0_6px_18px_rgba(140,70,255,0.18)] transition-transform duration-300 hover:scale-105"
+              priority
             />
           </a>
 
@@ -82,12 +93,15 @@ const Header = () => {
           >
             <div className="flex items-center gap-2">
               {navigation.map((item) => {
-                const active = item.url === pathname.hash;
+                const active = item.url === activeHash;
                 return (
                   <a
                     key={item.id}
                     href={item.url}
-                    onClick={handleClick}
+                    onClick={(event) => {
+                      handleClick(event);
+                      setActiveHash(item.url);
+                    }}
                     className={`
     group relative font-mono font-semibold uppercase text-sm tracking-wider px-6 py-4
     transition-all duration-300
@@ -131,7 +145,7 @@ const Header = () => {
           <div className="hidden lg:flex lg:items-center ml-auto gap-4">
             {/* Example CTA — keep or remove */}
             <a
-              href="/pricing"
+              href="#pricing"
               className="hidden md:inline-flex items-center px-4 py-2 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-semibold shadow-[0_8px_30px_rgba(140,60,255,0.14)] hover:brightness-105 transition"
             >
               Get started
@@ -175,12 +189,13 @@ const Header = () => {
             >
               <div className="flex items-center justify-between mb-6">
                 <a href="#hero" onClick={handleClick} aria-label="Home">
-                  <img
+                  <OptimizedImage
                     src={WaslaOne}
                     width={120}
                     height={50}
                     alt="Wasla One"
                     className="object-contain"
+                    priority
                   />
                 </a>
 
@@ -201,7 +216,10 @@ const Header = () => {
                   <a
                     key={item.id}
                     href={item.url}
-                    onClick={handleClick}
+                    onClick={() => {
+                      handleClick();
+                      setActiveHash(item.url);
+                    }}
                     className="block px-4 py-3 rounded-xl text-left font-semibold text-white/90 hover:bg-white/6 transition"
                   >
                     <div className="flex items-center justify-between">
@@ -223,7 +241,7 @@ const Header = () => {
 
               <div className="mt-6 pt-4 border-t border-white/6">
                 <a
-                  href="/pricing"
+                  href="#pricing"
                   className="block w-full text-center py-3 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-semibold shadow-[0_12px_40px_rgba(140,60,255,0.18)] transition"
                 >
                   Start Building

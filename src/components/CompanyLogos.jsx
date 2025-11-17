@@ -7,6 +7,7 @@ import {
   useAnimationFrame,
 } from "framer-motion";
 import { useRef } from "react";
+import OptimizedImage from "./OptimizedImage";
 
 const CompanyLogos = ({ className }) => {
   const { scrollY } = useScroll();
@@ -57,7 +58,7 @@ const CompanyLogos = ({ className }) => {
               className="flex items-center justify-center min-w-[12rem] h-[6rem] 
               opacity-80 hover:opacity-100 transition pointer-events-none"
             >
-              <img
+              <OptimizedImage
                 src={logo}
                 className="w-auto h-10 object-contain"
                 alt="company logo"

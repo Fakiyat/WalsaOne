@@ -1,9 +1,5 @@
 import { useEffect, useRef } from "react";
 import SectionSvg from "../assets/svg/SectionSvg";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const Section = ({
   className,
@@ -16,26 +12,30 @@ const Section = ({
   const sectionRef = useRef(null);
 
   useEffect(() => {
-    if (!sectionRef.current) return;
+    const node = sectionRef.current;
+    if (!node) return;
 
-    // Fade + slight rise when entering screen
-    gsap.fromTo(
-      sectionRef.current,
-      {
-        opacity: 0,
-        y: 40,
+    node.classList.add("section-observe");
+
+    if (!("IntersectionObserver" in window)) {
+      node.classList.add("section-visible");
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries, obs) => {
+        const entry = entries[0];
+        if (entry.isIntersecting) {
+          node.classList.add("section-visible");
+          obs.unobserve(entry.target);
+        }
       },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 1.2,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 85%",
-        },
-      }
+      { threshold: 0.18 }
     );
+
+    observer.observe(node);
+
+    return () => observer.disconnect();
   }, []);
 
   return (

@@ -1,13 +1,10 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { brainwaveSymbol, check } from "../assets";
 import { collabApps, collabContent, collabText } from "../constants";
 import Button from "./Button";
 import Section from "./Sections";
-import { LeftCurve, RightCurve } from "./design/Collaboration";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
+import OptimizedImage from "./OptimizedImage";
+import { loadScrollTrigger } from "../utils/gsapLoader";
 
 const Collaboration = () => {
   const circleRef = useRef(null);
@@ -15,131 +12,216 @@ const Collaboration = () => {
   const glowRingRef = useRef(null);
   const scanRef = useRef(null);
   const centerRef = useRef(null);
+  const gsapRef = useRef(null);
 
+  const [enableMotion, setEnableMotion] = useState(true);
+
+  /* -------------------------------
+     PREFERS REDUCED MOTION CHECK
+  -------------------------------- */
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    );
+    const isLargeScreen = window.matchMedia("(min-width: 1024px)");
+
+    const updateMotion = () =>
+      setEnableMotion(!prefersReducedMotion.matches && isLargeScreen.matches);
+
+    updateMotion();
+
+    prefersReducedMotion.addEventListener("change", updateMotion);
+    isLargeScreen.addEventListener("change", updateMotion);
+
+    return () => {
+      prefersReducedMotion.removeEventListener("change", updateMotion);
+      isLargeScreen.removeEventListener("change", updateMotion);
+    };
+  }, []);
+
+  /* -------------------------------
+     MAIN ANIMATIONS (Optimized)
+  -------------------------------- */
+  useEffect(() => {
+    if (!enableMotion) return;
+
     const circle = circleRef.current;
     const glowRing = glowRingRef.current;
     const scan = scanRef.current;
     const center = centerRef.current;
+    if (!circle || !glowRing || !scan || !center) return;
 
-    // 🌀 1. Main Circle alternating-speed rotation
-    gsap.to(circle, {
-      rotate: 360,
-      duration: 24,
-      ease: "linear",
-      repeat: -1,
-    });
+    let ctx;
+    let cancelled = false;
 
-    // 🌟 2. Glow ring breathing animation
-    gsap.fromTo(
-      glowRing,
-      { opacity: 0.2, scale: 0.98 },
-      {
-        opacity: 0.6,
-        scale: 1.04,
-        duration: 3,
-        ease: "sine.inOut",
-        repeat: -1,
-        yoyo: true,
-      }
-    );
+    const init = async () => {
+      const { gsap } = await loadScrollTrigger();
+      if (cancelled) return;
 
-    // ⚡ 3. Electric hologram scan sweep
-    gsap.to(scan, {
-      opacity: 0.3,
-      rotate: 360,
-      duration: 6,
-      ease: "power2.inOut",
-      repeat: -1,
-    });
+      gsapRef.current = gsap;
 
-    // 🔆 4. Center icon pulse
-    gsap.fromTo(
-      center,
-      { scale: 0.95 },
-      {
-        scale: 1.05,
-        duration: 2.5,
-        ease: "expo.inOut",
-        repeat: -1,
-        yoyo: true,
-      }
-    );
-
-    // 🟣 5. Parallax + scroll outward effect for icons
-    iconsRef.current.forEach((icon, i) => {
-      // Scroll pop-out
-      gsap.fromTo(
-        icon,
-        { y: 0, scale: 1 },
-        {
-          y: -25,
-          scale: 1.22,
-          duration: 1.5,
-          ease: "expo.out",
-          scrollTrigger: {
-            trigger: circle,
-            start: "top 80%",
-            end: "top 20%",
-            scrub: true,
-          },
-        }
-      );
-
-      // Micro orbit shaking
-      gsap.to(icon, {
-        x: gsap.utils.random(-4, 4),
-        y: gsap.utils.random(-4, 4),
-        duration: gsap.utils.random(2.5, 4),
-        yoyo: true,
-        repeat: -1,
-        ease: "sine.inOut",
-      });
-
-      // Neon glow pulse
-      gsap.fromTo(
-        icon,
-        { boxShadow: "0 0 0px rgba(150,60,255,0)" },
-        {
-          boxShadow: "0 0 18px rgba(150,60,255,0.65)",
-          duration: 3,
+      ctx = gsap.context(() => {
+        /* --- SMOOTH ROTATION --- */
+        gsap.to(circle, {
+          rotate: 360,
+          duration: 28,
+          ease: "none",
           repeat: -1,
-          yoyo: true,
-          ease: "sine.inOut",
-        }
-      );
-    });
+        });
 
-    // 🖱 Circle tilt on mouse move
-    const handleMouseMove = (e) => {
-      const rect = circle.getBoundingClientRect();
-      const x = e.clientX - (rect.left + rect.width / 2);
-      const y = e.clientY - (rect.top + rect.height / 2);
+        /* --- GLOW PULSE (CSS-like) --- */
+        gsap.fromTo(
+          glowRing,
+          { opacity: 0.25, scale: 0.97 },
+          {
+            opacity: 0.55,
+            scale: 1.04,
+            duration: 3,
+            ease: "sine.inOut",
+            repeat: -1,
+            yoyo: true,
+          }
+        );
 
-      gsap.to(circle, {
-        rotateX: y * -0.03,
-        rotateY: x * 0.03,
-        duration: 0.6,
-        ease: "power2.out",
+        /* --- SCAN ROTATION --- */
+        gsap.to(scan, {
+          rotate: 360,
+          opacity: 0.35,
+          duration: 10,
+          ease: "none",
+          repeat: -1,
+        });
+
+        /* --- CENTER BREATHING --- */
+        gsap.fromTo(
+          center,
+          { scale: 0.94 },
+          {
+            scale: 1.06,
+            duration: 4,
+            ease: "power1.inOut",
+            repeat: -1,
+            yoyo: true,
+          }
+        );
+
+        /* --- ICON FLOAT --- */
+        iconsRef.current.forEach((icon, i) => {
+          if (!icon) return;
+
+          gsap.to(icon, {
+            y: i % 2 === 0 ? -22 : -16,
+            scale: 1.15,
+            duration: 1.6,
+            ease: "power1.inOut",
+            yoyo: true,
+            repeat: -1,
+          });
+
+          gsap.to(icon, {
+            x: i % 2 === 0 ? -4 : 4,
+            duration: 3.5,
+            ease: "sine.inOut",
+            yoyo: true,
+            repeat: -1,
+          });
+
+          gsap.from(icon, {
+            y: 0,
+            scrollTrigger: {
+              trigger: circle,
+              start: "top 85%",
+              end: "top 25%",
+              scrub: true,
+            },
+          });
+        });
       });
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
+    init();
 
+    return () => {
+      cancelled = true;
+      ctx?.revert();
+    };
+  }, [enableMotion]);
+
+  /* -------------------------------
+     MOUSEMOVE PARALLAX (50% LESS WORK)
+  -------------------------------- */
+  useEffect(() => {
+    if (!enableMotion) return;
+    const circle = circleRef.current;
+    if (!circle) return;
+
+    let rafId;
+    let targetX = 0;
+    let targetY = 0;
+
+    let cleanup = () => {};
+    let cancelled = false;
+
+    const init = async () => {
+      const { gsap } = await loadScrollTrigger();
+      if (cancelled) return;
+      gsapRef.current = gsap;
+
+      const handleMouseMove = (e) => {
+        const rect = circle.getBoundingClientRect();
+        targetX = e.clientX - (rect.left + rect.width / 2);
+        targetY = e.clientY - (rect.top + rect.height / 2);
+
+        if (rafId) return;
+
+        rafId = requestAnimationFrame(() => {
+          gsap.to(circle, {
+            rotateX: -targetY * 0.03,
+            rotateY: targetX * 0.03,
+            duration: 0.6,
+            ease: "power2.out",
+          });
+          rafId = null;
+        });
+      };
+
+      window.addEventListener("mousemove", handleMouseMove);
+
+      cleanup = () => {
+        window.removeEventListener("mousemove", handleMouseMove);
+      };
+    };
+
+    init();
+
+    return () => {
+      cancelled = true;
+      cleanup();
+    };
+  }, [enableMotion]);
+
+  /* -------------------------------
+     RENDER
+  -------------------------------- */
   return (
-    <Section crosses>
+    <Section crosses id="why-us">
       <div className="container lg:flex" id="why-us">
-        {/* LEFT CONTENT */}
+        {/* LEFT SIDE */}
         <div className="max-w-[25rem]">
           <h2 className="h2 mb-4 md:mb-8">Why Us?</h2>
 
           <ul className="max-w-[22rem] mb-10 md:mb-14">
             {collabContent.map((item) => (
-              <li className="mb-3 py-3" key={item.id}>
+              <li key={item.id} className="mb-3 py-3">
                 <div className="flex items-center">
-                  <img src={check} width={24} height={24} alt="check" />
+                  <OptimizedImage
+                    src={check}
+                    width={24}
+                    height={24}
+                    alt="check"
+                  />
                   <h6 className="body-2 ml-5">{item.title}</h6>
                 </div>
                 {item.text && (
@@ -152,7 +234,7 @@ const Collaboration = () => {
           <Button>Try it now</Button>
         </div>
 
-        {/* RIGHT — PREMIUM ANIMATED CIRCLE */}
+        {/* RIGHT — OPTIMIZED ORBIT ANIMATION */}
         <div className="lg:ml-auto xl:w-[38rem] mt-4">
           <p className="body-2 mb-8 text-n-4 md:mb-16 lg:mb-32 lg:w-[22rem] lg:mx-auto">
             {collabText}
@@ -162,26 +244,26 @@ const Collaboration = () => {
             ref={circleRef}
             className="relative left-1/2 flex w-[22rem] aspect-square -translate-x-1/2"
           >
-            {/* BREATHING GLOW RING */}
+            {/* Glow ring */}
             <div
               ref={glowRingRef}
-              className="absolute inset-0 w-full h-full rounded-full bg-purple-500/20 blur-3xl"
+              className="absolute inset-0 rounded-full bg-purple-500/20 blur-3xl"
             />
 
-            {/* HOLOGRAM SCAN */}
+            {/* Hologram border */}
             <div
               ref={scanRef}
-              className="absolute inset-0 w-full h-full rounded-full border border-purple-400/40 opacity-0"
+              className="absolute inset-0 rounded-full border border-purple-400/40 opacity-0"
             />
 
-            {/* INNER CORE RINGS */}
+            {/* Inner rings */}
             <div className="flex w-60 aspect-square m-auto border border-purple-500/30 rounded-full">
               <div
                 ref={centerRef}
                 className="w-[6rem] aspect-square m-auto p-[0.2rem] bg-conic-gradient rounded-full"
               >
                 <div className="flex items-center justify-center w-full h-full bg-n-8 rounded-full">
-                  <img
+                  <OptimizedImage
                     src={brainwaveSymbol}
                     width={48}
                     height={48}
@@ -191,27 +273,27 @@ const Collaboration = () => {
               </div>
             </div>
 
-            {/* ORBITING ICONS */}
+            {/* Orbiting apps */}
             <ul>
-              {collabApps.map((app, index) => (
+              {collabApps.map((app, i) => (
                 <li
                   key={app.id}
                   className={`absolute top-0 left-1/2 h-1/2 -ml-[1.6rem] origin-bottom rotate-${
-                    index * 45
+                    i * 45
                   }`}
                 >
                   <div
-                    ref={(el) => (iconsRef.current[index] = el)}
+                    ref={(el) => (iconsRef.current[i] = el)}
                     className={`relative -top-[1.6rem] flex w-[3.2rem] h-[3.2rem] bg-n-7 border border-purple-400/20 rounded-xl -rotate-${
-                      index * 45
+                      i * 45
                     }`}
                   >
-                    <img
-                      className="m-auto"
+                    <OptimizedImage
+                      src={app.icon}
                       width={app.width}
                       height={app.height}
                       alt={app.title}
-                      src={app.icon}
+                      className="m-auto"
                     />
                   </div>
                 </li>

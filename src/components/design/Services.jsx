@@ -1,11 +1,12 @@
 import { brainwaveWhiteSymbol, gradient, play } from "../../assets";
 import ChatBubbleWing from "../../assets/svg/ChatBubbleWing";
 import { motion } from "framer-motion";
+import OptimizedImage from "../OptimizedImage";
 
 export const Gradient = () => {
   return (
     <div className="absolute top-0 -left-[10rem] w-[56.625rem] h-[56.625rem] opacity-50 mix-blend-color-dodge pointer-events-none">
-      <img
+      <OptimizedImage
         className="absolute top-1/2 left-1/2 w-[79.5625rem] max-w-[79.5625rem] h-[88.5625rem] -translate-x-1/2 -translate-y-1/2"
         src={gradient}
         width={1417}
@@ -107,7 +108,7 @@ export const VideoChatMessage = () => {
         animate={{ scale: [1, 1.08, 1] }}
         transition={{ duration: 2.4, repeat: Infinity }}
       >
-        <img
+        <OptimizedImage
           src={brainwaveWhiteSymbol}
           width={26}
           height={26}
@@ -148,15 +149,13 @@ export const VideoBar = () => {
       className="absolute left-0 bottom-0 w-full flex items-center p-6"
     >
       {/* PLAY BUTTON */}
-      <motion.img
-        src={play}
-        width={24}
-        height={24}
-        alt="Play"
+      <motion.div
         className="mr-4 opacity-90"
         whileHover={{ scale: 1.2 }}
         transition={{ duration: 0.2 }}
-      />
+      >
+        <OptimizedImage src={play} width={24} height={24} alt="Play" />
+      </motion.div>
 
       {/* PROGRESS BAR */}
       <div className="flex-1 bg-white/20 rounded-full h-[3px] overflow-hidden">

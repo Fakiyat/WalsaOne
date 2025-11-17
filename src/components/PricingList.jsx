@@ -4,36 +4,50 @@ import { pricing } from "../constants";
 import Button from "./Button";
 import { motion } from "framer-motion";
 import { useEffect, useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
+import OptimizedImage from "./OptimizedImage";
+import { loadScrollTrigger } from "../utils/gsapLoader";
 
 const PricingList = ({ billing = "one-time" }) => {
   const cardsRef = useRef([]);
   cardsRef.current = [];
 
   useEffect(() => {
-    // GSAP Reveal: staggered entry from bottom with slight rotation
-    cardsRef.current.forEach((el, i) => {
-      gsap.fromTo(
-        el,
-        { opacity: 0, y: 40, rotateX: 6 },
-        {
-          opacity: 1,
-          y: 0,
-          rotateX: 0,
-          duration: 1,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: el,
-            start: "top 85%",
-            toggleActions: "play none none reverse",
-          },
-          delay: i * 0.08,
-        }
-      );
-    });
+    let ctx;
+    let cancelled = false;
+
+    const init = async () => {
+      const { gsap } = await loadScrollTrigger();
+      if (cancelled) return;
+
+      ctx = gsap.context(() => {
+        cardsRef.current.forEach((el, i) => {
+          gsap.fromTo(
+            el,
+            { opacity: 0, y: 40, rotateX: 6 },
+            {
+              opacity: 1,
+              y: 0,
+              rotateX: 0,
+              duration: 1,
+              ease: "power3.out",
+              scrollTrigger: {
+                trigger: el,
+                start: "top 85%",
+                toggleActions: "play none none reverse",
+              },
+              delay: i * 0.08,
+            }
+          );
+        });
+      });
+    };
+
+    init();
+
+    return () => {
+      cancelled = true;
+      ctx?.revert();
+    };
   }, []);
 
   const addRef = (el) => {
@@ -52,7 +66,7 @@ const PricingList = ({ billing = "one-time" }) => {
 
   return (
     <div className="grid md:grid-cols-3 gap-7">
-      {pricing.map((item, index) => {
+      {pricing.map((item) => {
         const priceVal = computePrice(item.price);
         return (
           <motion.div
@@ -88,11 +102,7 @@ const PricingList = ({ billing = "one-time" }) => {
               )}
             </div>
 
-            <Button
-              href={item.price ? "/pricing" : ""}
-              white={!!item.price}
-              className="w-full mb-6"
-            >
+            <Button href="#contact" white={!!item.price} className="w-full mb-6">
               {item.price
                 ? billing === "monthly"
                   ? "Start Monthly"
@@ -103,7 +113,11 @@ const PricingList = ({ billing = "one-time" }) => {
             <ul className="space-y-4">
               {item.features.map((feature, i) => (
                 <li key={i} className="flex items-start gap-3 text-white/85">
-                  <img src={check} className="w-5 mt-1 opacity-80" />
+                  <OptimizedImage
+                    src={check}
+                    className="w-5 mt-1 opacity-80"
+                    alt="Included"
+                  />
                   <p className="text-sm">{feature}</p>
                 </li>
               ))}

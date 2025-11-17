@@ -1,4 +1,5 @@
 import { loading } from "../assets";
+import OptimizedImage from "./OptimizedImage";
 
 const Generating = ({ className }) => {
   return (
@@ -7,7 +8,7 @@ const Generating = ({ className }) => {
         className || ""
       } text-base`}
     >
-      <img className="w-5 h-5 mr-4" src={loading} alt="Loading" />
+      <OptimizedImage className="w-5 h-5 mr-4" src={loading} alt="Loading" />
       We are always ready for you...
     </div>
   );

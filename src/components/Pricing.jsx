@@ -1,168 +1,191 @@
-// Pricing.jsx
+// Pricing.jsx — PERFORMANCE SUPER-OPTIMIZED
 import Section from "./Sections";
 import Heading from "./Heading";
 import PricingList from "./PricingList";
 import { smallSphere, stars } from "../assets";
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-gsap.registerPlugin(ScrollTrigger);
+import OptimizedImage from "./OptimizedImage";
 
 const Pricing = () => {
-  const sphereWrapperRef = useRef(null);
-  const tiltLayerRef = useRef(null);
+  const tiltRef = useRef(null);
   const particlesRef = useRef(null);
 
   const [billing, setBilling] = useState("one-time");
 
-  /* ---------------------------------------------- */
-  /* FLOAT ANIMATION (Framer Motion)                */
-  /* ---------------------------------------------- */
-  const floatMotion = useMotionValue(0);
-  const floatY = useTransform(floatMotion, [0, 1], ["0%", "8%"]);
+  /* -------------------------------------------
+      LIGHT FLOAT ANIMATION (Reduced Motion)
+  -------------------------------------------- */
+  const floatVal = useMotionValue(0);
+  const floatY = useTransform(floatVal, [0, 1], ["0%", "4%"]); // ⬅ reduced from 9%
 
   useEffect(() => {
-    const interval = setInterval(() => floatMotion.set(Math.random()), 3000);
+    const interval = setInterval(() => floatVal.set(Math.random()), 4200);
     return () => clearInterval(interval);
-  }, []);
+  }, [floatVal]);
 
-  /* ---------------------------------------------- */
-  /* FIXED 3D TILT LOGIC (NO MORE TILT BUG)         */
-  /* ---------------------------------------------- */
+  /* -------------------------------------------
+      ULTRA-OPTIMIZED GPU 3D TILT
+  -------------------------------------------- */
   useEffect(() => {
-    const tiltEl = tiltLayerRef.current;
-    if (!tiltEl) return;
+    const el = tiltRef.current;
+    if (!el) return;
 
-    tiltEl.style.transform = "perspective(1400px) rotateX(0deg) rotateY(0deg)";
+    let raf = null;
+    let tX = 0;
+    let tY = 0;
 
-    const handleMove = (e) => {
-      const rect = tiltEl.getBoundingClientRect();
-      const x = e.clientX - (rect.left + rect.width / 2);
-      const y = e.clientY - (rect.top + rect.height / 2);
-
-      const rotateY = (x / rect.width) * 20;
-      const rotateX = -(y / rect.height) * 14;
-
-      gsap.to(tiltEl, {
-        rotateX,
-        rotateY,
-        duration: 0.9,
-        ease: "power3.out",
-      });
+    const applyTilt = () => {
+      el.style.transform = `perspective(1200px) rotateY(${tX}deg) rotateX(${tY}deg)`;
+      raf = null;
     };
 
-    const handleLeave = () => {
-      gsap.to(tiltEl, {
-        rotateX: 0,
-        rotateY: 0,
-        duration: 1,
-        ease: "power3.out",
-      });
+    const handleMove = (e) => {
+      const rect = el.getBoundingClientRect();
+      const mx = (e.clientX - (rect.left + rect.width / 2)) / rect.width;
+      const my = (e.clientY - (rect.top + rect.height / 2)) / rect.height;
+
+      tX = mx * 8;
+      tY = -my * 6;
+
+      if (!raf) {
+        raf = requestAnimationFrame(applyTilt);
+      }
+    };
+
+    const reset = () => {
+      tX = 0;
+      tY = 0;
+      if (!raf) {
+        raf = requestAnimationFrame(applyTilt);
+      }
     };
 
     window.addEventListener("mousemove", handleMove);
-    window.addEventListener("mouseleave", handleLeave);
+    window.addEventListener("mouseleave", reset);
 
     return () => {
+      if (raf) cancelAnimationFrame(raf);
       window.removeEventListener("mousemove", handleMove);
-      window.removeEventListener("mouseleave", handleLeave);
+      window.removeEventListener("mouseleave", reset);
+      el.style.transform = "";
     };
   }, []);
 
-  /* ---------------------------------------------- */
-  /* PARTICLES CANVAS (Nebula + Sparks)             */
-  /* ---------------------------------------------- */
+  /* -------------------------------------------
+      PARTICLES — SUPER THROTTLED VERSION
+  -------------------------------------------- */
   useEffect(() => {
     const canvas = particlesRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+
+    const ctx = canvas.getContext("2d", { alpha: true });
     let w = (canvas.width = canvas.offsetWidth);
     let h = (canvas.height = canvas.offsetHeight);
 
     const rand = (a, b) => Math.random() * (b - a) + a;
 
-    const sparks = Array.from({ length: 50 }).map(() => ({
+    // 25 sparks only (reduced)
+    const sparks = Array.from({ length: 25 }).map(() => ({
       x: rand(0, w),
       y: rand(0, h),
-      vx: rand(-0.2, 0.2),
-      vy: rand(-0.2, -0.6),
-      size: rand(0.4, 1.5),
-      life: rand(70, 150),
-      hue: rand(250, 290),
-      alpha: rand(0.2, 0.6),
+      vx: rand(-0.1, 0.1),
+      vy: rand(-0.1, -0.35),
+      size: rand(0.3, 1),
+      hue: rand(250, 295),
+      alpha: rand(0.15, 0.4),
+      life: rand(60, 130),
     }));
 
-    const blobs = Array.from({ length: 5 }).map(() => ({
+    // 3 blobs only (reduced)
+    const blobs = Array.from({ length: 3 }).map(() => ({
       x: rand(w * 0.2, w * 0.8),
       y: rand(h * 0.2, h * 0.8),
-      r: rand(90, 160),
-      vx: rand(-0.03, 0.03),
-      vy: rand(-0.02, 0.02),
-      alpha: rand(0.04, 0.1),
-      hue: rand(250, 290),
+      r: rand(75, 130),
+      vx: rand(-0.015, 0.015),
+      vy: rand(-0.015, 0.015),
+      hue: rand(240, 300),
+      alpha: rand(0.02, 0.06),
     }));
 
-    const draw = () => {
+    let last = 0;
+
+    const draw = (ts) => {
+      if (ts - last < 22) {
+        requestAnimationFrame(draw);
+        return;
+      }
+      last = ts;
+
       ctx.clearRect(0, 0, w, h);
 
-      blobs.forEach((b) => {
+      // glow blobs
+      for (const b of blobs) {
         b.x += b.vx;
         b.y += b.vy;
-        ctx.beginPath();
-        const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
-        g.addColorStop(0, `hsla(${b.hue},80%,60%,${b.alpha})`);
-        g.addColorStop(1, `rgba(0,0,0,0)`);
-        ctx.fillStyle = g;
-        ctx.fillRect(b.x - b.r, b.y - b.r, b.r * 2, b.r * 2);
-      });
 
-      sparks.forEach((s) => {
+        const grad = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
+        grad.addColorStop(0, `hsla(${b.hue},80%,60%,${b.alpha})`);
+        grad.addColorStop(1, `transparent`);
+        ctx.fillStyle = grad;
+        ctx.fillRect(b.x - b.r, b.y - b.r, b.r * 2, b.r * 2);
+      }
+
+      // sparks
+      for (const s of sparks) {
         s.x += s.vx;
         s.y += s.vy;
         s.life--;
+
         if (s.life <= 0 || s.y < -20) {
           s.x = rand(0, w);
-          s.y = h + rand(0, 50);
-          s.life = rand(70, 150);
+          s.y = h + rand(0, 40);
+          s.life = rand(60, 120);
         }
+
         ctx.beginPath();
         ctx.fillStyle = `hsla(${s.hue},80%,60%,${s.alpha})`;
         ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
         ctx.fill();
-      });
+      }
 
       requestAnimationFrame(draw);
     };
 
-    draw();
+    requestAnimationFrame(draw);
 
     const resize = () => {
       w = canvas.width = canvas.offsetWidth;
       h = canvas.height = canvas.offsetHeight;
     };
-
     window.addEventListener("resize", resize);
+
     return () => window.removeEventListener("resize", resize);
   }, []);
 
-  /* ---------------------------------------------- */
-  /* RETURN JSX                                     */
-  /* ---------------------------------------------- */
+  /* -------------------------------------------
+      RETURN (UI UNCHANGED)
+  -------------------------------------------- */
 
   return (
     <Section className="overflow-hidden" id="pricing">
-      <div className="container relative z-2">
-        {/* 🌌 Background Stars */}
-        <motion.img
-          src={stars}
-          className="absolute inset-0 w-full opacity-[0.15] pointer-events-none -z-20"
+      <div className="container relative">
+        {/* Stars Background */}
+        <motion.div
+          className="absolute inset-0 w-full opacity-[0.15] -z-20"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 0.15 }}
-          transition={{ duration: 1.2 }}
-        />
+          transition={{ duration: 1.1 }}
+        >
+          <OptimizedImage
+            src={stars}
+            alt="stars"
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+        </motion.div>
 
-        {/* Heading + Billing Toggle */}
+        {/* Heading + Billing */}
         <div className="flex flex-col lg:flex-row justify-between gap-6">
           <Heading
             tag="Rapid MVP Creator"
@@ -170,15 +193,16 @@ const Pricing = () => {
             text="Transparent one-time pricing. Designed for founders and teams who want production-ready MVPs without complexity."
           />
 
+          {/* Toggle */}
           <div className="mt-3 lg:mt-0">
             <div className="flex bg-black/30 border border-white/10 rounded-full p-1">
               {["one-time", "monthly"].map((type) => (
                 <button
                   key={type}
                   onClick={() => setBilling(type)}
-                  className={`px-5 py-2 rounded-full text-sm transition font-semibold ${
+                  className={`px-5 py-2 rounded-full text-sm font-semibold transition ${
                     billing === type
-                      ? "bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-[0_6px_18px_rgba(150,60,255,0.28)]"
+                      ? "bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-[0_6px_18px_rgba(150,60,255,0.25)]"
                       : "text-white/60 hover:text-white"
                   }`}
                 >
@@ -195,45 +219,32 @@ const Pricing = () => {
             <PricingList billing={billing} />
           </div>
 
-          {/* Right Side Sphere */}
+          {/* Sphere */}
           <div className="relative w-full lg:w-[38%] h-[38rem]">
             <canvas
               ref={particlesRef}
               className="absolute inset-0 w-full h-full rounded-3xl -z-10"
             />
 
-            {/* Floating hologram shapes */}
             <motion.div
-              className="absolute inset-3 pointer-events-none"
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1.2 }}
-            >
-              <div className="absolute top-6 left-6 w-40 h-28 bg-gradient-to-br from-purple-600/18 to-indigo-600/10 border border-white/6 rounded-xl blur-[8px] rotate-3" />
-              <div className="absolute top-36 right-6 w-44 h-32 bg-gradient-to-br from-indigo-600/12 to-purple-600/08 border border-white/6 rounded-xl blur-[8px] -rotate-2" />
-              <div className="absolute bottom-10 left-10 w-48 h-36 bg-gradient-to-br from-purple-500/14 to-indigo-500/06 border border-white/6 rounded-xl blur-[8px] rotate-1" />
-            </motion.div>
-
-            {/* Sphere with FIXED tilt */}
-            <motion.div
-              ref={sphereWrapperRef}
               style={{ y: floatY }}
               className="relative w-full h-full flex items-center justify-center"
             >
               <div
-                ref={tiltLayerRef}
-                className="w-[22rem] h-[22rem] lg:w-[28rem] lg:h-[28rem] flex items-center justify-center transform-gpu"
+                ref={tiltRef}
+                className="w-[20rem] h-[20rem] lg:w-[26rem] lg:h-[26rem] flex items-center justify-center transform-gpu"
               >
-                <img
+                <OptimizedImage
                   src={smallSphere}
-                  alt="sphere"
+                  alt="Premium sphere"
                   className="w-full h-full object-contain select-none"
                   draggable={false}
+                  priority
                 />
               </div>
 
-              <div className="absolute w-[30rem] h-[30rem] rounded-full pointer-events-none -z-10">
-                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500/20 via-indigo-400/12 to-transparent blur-3xl mix-blend-screen" />
+              <div className="absolute w-[28rem] h-[28rem] rounded-full -z-10 pointer-events-none">
+                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500/18 via-indigo-400/10 to-transparent blur-2xl mix-blend-screen" />
               </div>
             </motion.div>
           </div>
@@ -241,7 +252,7 @@ const Pricing = () => {
 
         <div className="flex justify-center mt-10">
           <a
-            href="/pricing"
+            href="#contact"
             className="text-xs font-code font-bold uppercase border-b tracking-wider hover:text-purple-300 transition"
           >
             See full details

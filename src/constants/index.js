@@ -39,38 +39,38 @@ import {
 
 export const navigation = [
   {
-    id: "0",
+    id: "1",
     title: "Features",
     url: "#features",
   },
   {
-    id: "1",
+    id: "2",
     title: "Services",
     url: "#services",
   },
   {
-    id: "2",
+    id: "3",
     title: "Why Us?",
     url: "#why-us",
   },
   {
-    id: "3",
+    id: "4",
     title: "How?",
     url: "#how",
   },
   {
-    id: "4",
+    id: "5",
     title: "Pricing",
     url: "#pricing",
   },
   // {
-  //   id: "5",
+  //   id: "6",
   //   title: "New account",
   //   url: "#signup",
   //   onlyMobile: true,
   // },
   // {
-  //   id: "6",
+  //   id: "7",
   //   title: "Sign in",
   //   url: "#login",
   //   onlyMobile: true,
@@ -282,7 +282,7 @@ export const benefits = [
     id: "1",
     title: "Idea → MVP in Days",
     text: "Transform your startup idea into a functional MVP with wireframes, roadmap, and clear project structure.",
-    backgroundUrl: "assets/backgroung.jpg",
+    backgroundUrl: "assets/background.webp",
     iconUrl: benefitIcon1,
     imageUrl: benefitImage2,
     light: true,
@@ -318,7 +318,7 @@ export const benefits = [
     id: "5",
     title: "Deployment & DevOps",
     text: "Launch on AWS, Vercel, or DigitalOcean with global CDN, monitoring, and seamless scaling.",
-    backgroundUrl: "assets/background.jpg",
+    backgroundUrl: "assets/background.webp",
     iconUrl: benefitIcon1,
     imageUrl: benefitImage2,
   },

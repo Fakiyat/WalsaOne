@@ -7,46 +7,61 @@ import Tagline from "./Tagline";
 import { roadmap } from "../constants";
 import { check2, loading1, grid } from "../assets";
 import { Gradient } from "./design/Roadmap";
+import OptimizedImage from "./OptimizedImage";
 
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { motion } from "framer-motion";
-
-gsap.registerPlugin(ScrollTrigger);
+import { loadScrollTrigger } from "../utils/gsapLoader";
 
 const Roadmap = () => {
   const cardsRef = useRef([]);
 
   useEffect(() => {
-    cardsRef.current.forEach((card, i) => {
-      gsap.fromTo(
-        card,
-        {
-          opacity: 0,
-          y: 80,
-          rotateX: 8,
-          scale: 0.92,
-        },
-        {
-          opacity: 1,
-          y: 0,
-          rotateX: 0,
-          scale: 1,
-          duration: 1.2,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: card,
-            start: "top 85%",
-            toggleActions: "play none none reverse",
-          },
-          delay: i * 0.15,
-        }
-      );
-    });
+    let ctx;
+    let cancelled = false;
+
+    const init = async () => {
+      const { gsap } = await loadScrollTrigger();
+      if (cancelled) return;
+
+      ctx = gsap.context(() => {
+        cardsRef.current.forEach((card, i) => {
+          gsap.fromTo(
+            card,
+            {
+              opacity: 0,
+              y: 80,
+              rotateX: 8,
+              scale: 0.92,
+            },
+            {
+              opacity: 1,
+              y: 0,
+              rotateX: 0,
+              scale: 1,
+              duration: 1.2,
+              ease: "power3.out",
+              scrollTrigger: {
+                trigger: card,
+                start: "top 85%",
+                toggleActions: "play none none reverse",
+              },
+              delay: i * 0.15,
+            }
+          );
+        });
+      });
+    };
+
+    init();
+
+    return () => {
+      cancelled = true;
+      ctx?.revert();
+    };
   }, []);
 
   return (
-    <Section className="overflow-hidden" id="roadmap">
+    <Section className="overflow-hidden" id="how">
       <div className="container md:pb-16">
         {/* Heading */}
         <Heading
@@ -86,7 +101,7 @@ const Roadmap = () => {
                 {/* Inner card */}
                 <div className="relative p-10 bg-n-8 rounded-[2.3rem] overflow-hidden shadow-xl border border-white/10">
                   {/* Neon grid background */}
-                  <img
+                  <OptimizedImage
                     src={grid}
                     alt="Grid"
                     className="absolute top-0 left-0 w-full opacity-[0.18] pointer-events-none"
@@ -101,7 +116,7 @@ const Roadmap = () => {
                     <Tagline>{item.date}</Tagline>
 
                     <div className="flex items-center px-4 py-1 bg-white rounded-full text-black shadow-md">
-                      <img
+                      <OptimizedImage
                         src={item.status === "done" ? check2 : loading1}
                         width={18}
                         height={18}
@@ -114,13 +129,15 @@ const Roadmap = () => {
 
                   {/* Image Preview */}
                   <motion.div
-                    className="relative mb-10 rounded-2xl overflow-hidden"
+                    className="relative mb-8 rounded-2xl overflow-hidden"
                     initial={{ opacity: 0.6 }}
                     whileHover={{ opacity: 1, scale: 1.02 }}
                   >
-                    <img
+                    <OptimizedImage
                       src={item.imageUrl}
                       alt={item.title}
+                      width={80}
+                      height={80}
                       className="w-full object-cover"
                     />
 
@@ -146,7 +163,7 @@ const Roadmap = () => {
         </div>
 
         <div className="flex justify-center mt-12 md:mt-20">
-          <Button href="/roadmap">Explore Full Roadmap</Button>
+          <Button href="#contact">Explore Full Roadmap</Button>
         </div>
       </div>
     </Section>

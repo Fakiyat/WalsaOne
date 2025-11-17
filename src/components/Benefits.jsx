@@ -3,46 +3,62 @@ import { benefits } from "../constants";
 import Heading from "./Heading";
 import Section from "./Sections";
 import Arrow from "../assets/svg/Arrow";
-import { GradientLight } from "./design/Benefits";
 import ClipPath from "../assets/svg/ClipPath";
-
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
+import OptimizedImage from "./OptimizedImage";
+import { loadScrollTrigger } from "../utils/gsapLoader";
 
 const Benefits = () => {
   const cardsRef = useRef([]);
+  const gsapRef = useRef(null);
 
   useEffect(() => {
     cardsRef.current = cardsRef.current.slice(0, benefits.length);
 
-    cardsRef.current.forEach((card, i) => {
-      const direction = i % 2 === 0 ? -100 : 100;
+    let ctx;
+    let cancelled = false;
 
-      gsap.fromTo(
-        card,
-        {
-          opacity: 0,
-          x: direction,
-          y: 40,
-          rotate: direction > 0 ? 1 : -1,
-        },
-        {
-          opacity: 1,
-          x: 0,
-          y: 0,
-          rotate: 0,
-          duration: 1.3,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: card,
-            start: "top 85%",
-            toggleActions: "play none none reverse",
-          },
-        }
-      );
-    });
+    const init = async () => {
+      const { gsap } = await loadScrollTrigger();
+      if (cancelled) return;
+
+      gsapRef.current = gsap;
+
+      ctx = gsap.context(() => {
+        cardsRef.current.forEach((card, i) => {
+          const direction = i % 2 === 0 ? -100 : 100;
+
+          gsap.fromTo(
+            card,
+            {
+              opacity: 0,
+              x: direction,
+              y: 40,
+              rotate: direction > 0 ? 1 : -1,
+            },
+            {
+              opacity: 1,
+              x: 0,
+              y: 0,
+              rotate: 0,
+              duration: 1.3,
+              ease: "power3.out",
+              scrollTrigger: {
+                trigger: card,
+                start: "top 85%",
+                toggleActions: "play none none reverse",
+              },
+            }
+          );
+        });
+      });
+    };
+
+    init();
+
+    return () => {
+      cancelled = true;
+      ctx?.revert();
+    };
   }, []);
 
   // hover tilt effect
@@ -55,6 +71,9 @@ const Benefits = () => {
     const rotateY = (x / rect.width - 0.5) * intensity;
     const rotateX = (y / rect.height - 0.5) * -intensity;
 
+    const gsap = gsapRef.current;
+    if (!gsap) return;
+
     gsap.to(card, {
       rotateX,
       rotateY,
@@ -65,6 +84,9 @@ const Benefits = () => {
   };
 
   const resetTilt = (e) => {
+    const gsap = gsapRef.current;
+    if (!gsap) return;
+
     gsap.to(e.currentTarget, {
       rotateX: 0,
       rotateY: 0,
@@ -75,7 +97,7 @@ const Benefits = () => {
   };
 
   return (
-    <Section id="services">
+    <Section id="features">
       <div className="container relative z-2">
         <Heading
           className="md:max-w-md lg:max-w-3xl"
@@ -119,7 +141,7 @@ const Benefits = () => {
                 </p>
 
                 <div className="flex items-center mt-auto">
-                  <img
+                  <OptimizedImage
                     src={item.iconUrl}
                     width={48}
                     height={48}
@@ -138,7 +160,7 @@ const Benefits = () => {
                 style={{ clipPath: "url(#benefits)" }}
               >
                 {item.imageUrl && (
-                  <img
+                  <OptimizedImage
                     src={item.imageUrl}
                     alt={item.title}
                     className="w-full h-full object-cover"

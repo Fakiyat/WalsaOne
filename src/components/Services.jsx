@@ -1,28 +1,14 @@
 import Section from "./Sections";
 import Heading from "./Heading";
-import {
-  service1,
-  service2,
-  service3,
-  check,
-  prototype,
-  lock,
-  ai,
-} from "../assets";
+import { check, prototype, lock, ai } from "../assets";
 import { motion } from "framer-motion";
 
-import {
-  PhotoChatMessage,
-  Gradient,
-  VideoBar,
-  VideoChatMessage,
-} from "./design/Services";
-import micIcon from "../assets/3dIcons/mic.png";
-import settingIcon from "../assets/3dIcons/setting.png";
-import aiIcon from "../assets/3dIcons/ai-chip.png";
-import cloudIcon from "../assets/3dIcons/cloud-server.png";
-import { Linear } from "gsap";
-import { LeftLine, RightLine } from "./design/Pricing";
+import { PhotoChatMessage, Gradient, VideoBar } from "./design/Services";
+import micIcon from "../assets/3dIcons/mic.webp";
+import settingIcon from "../assets/3dIcons/setting.webp";
+import aiIcon from "../assets/3dIcons/ai-chip.webp";
+import cloudIcon from "../assets/3dIcons/cloud-server.webp";
+import OptimizedImage from "./OptimizedImage";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
@@ -31,7 +17,7 @@ const fadeUp = {
 
 const Services = () => {
   return (
-    <Section id="how" className="relative overflow-hidden">
+    <Section id="services" className="relative overflow-hidden">
       {/* BACKGROUND PREMIUM GRADIENT */}
       <div className="absolute inset-0 -z-10 opacity-60 blur-[120px] bg-gradient-to-br from-purple-700/40 to-indigo-700/30" />
 
@@ -51,7 +37,7 @@ const Services = () => {
         >
           {/* Background Image */}
           <div className="absolute inset-0 md:w-3/5 xl:w-auto -z-10">
-            <img
+            <OptimizedImage
               src={ai}
               alt="AI MVP Builder"
               className="w-full h-full object-cover md:object-right opacity-70"
@@ -77,7 +63,7 @@ const Services = () => {
                   key={i}
                   className="flex items-start gap-3 border-t border-white/10 pt-4"
                 >
-                  <img src={check} width={20} alt="check" />
+                  <OptimizedImage src={check} width={20} alt="check" />
                   <p className="text-n-2">{item}</p>
                 </li>
               ))}
@@ -97,9 +83,10 @@ const Services = () => {
             viewport={{ once: false, amount: 0.3 }}
             className="relative min-h-[39rem] rounded-3xl overflow-hidden border border-white/10 bg-black/40 backdrop-blur-md"
           >
-            <img
+            <OptimizedImage
               src={prototype}
               className="absolute inset-0 w-full h-full object-cover opacity-60"
+              alt="Prototype to Real Product"
             />
 
             <div className="absolute inset-0 flex flex-col justify-end p-10 bg-gradient-to-b from-transparent to-black/80">
@@ -141,7 +128,7 @@ const Services = () => {
                     key={i}
                     className="w-16 h-16 bg-black/20  rounded-2xl flex items-center justify-center"
                   >
-                    <img src={icon} className="w-12 opacity-100" />
+                    <OptimizedImage src={icon} className="w-12 opacity-100" alt="feature icon" />
                   </motion.div>
                 ))}
               </div>
@@ -149,9 +136,10 @@ const Services = () => {
 
             {/* VIDEO PREVIEW */}
             <div className="relative h-[20rem] bg-black/60 rounded-xl overflow-hidden">
-              <img
+              <OptimizedImage
                 src={lock}
                 className="w-full h-full object-cover opacity-60"
+                alt="Security preview"
               />
 
               <VideoBar />
